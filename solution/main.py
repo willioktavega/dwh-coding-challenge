@@ -104,6 +104,8 @@ print(savings_accounts_denormalize_df)
 
 denormalize_df = pd.DataFrame({
     'account_id': pd.Series(dtype='string'),
+    'ts': pd.Series(dtype='int64'),
+    'ts_to_datetime': pd.Series(dtype='datetime64[ns]'),
     'name': pd.Series(dtype='string'),
     'address': pd.Series(dtype='string'),
     'phone_number': pd.Series(dtype='string'),
@@ -129,6 +131,7 @@ for index, row in cards_denormalize_df.iterrows():
 
     cards = pd.DataFrame.from_records([row.to_dict()])
     include_columns = list(set(cards.columns) - set(exclude_columns))
+    include_columns = include_columns + ['ts', 'ts_to_datetime'] # keep ts column for cards data
     cards = cards[include_columns]
     record = cards.to_dict(orient='records')[0]
 
@@ -181,3 +184,9 @@ print(denormalize_df)
 
 print('\nTransaction has been made')
 print(denormalize_df[denormalize_df['credit_used'] > 0].groupby(['account_id'])['credit_used'].agg('count').reset_index(name='total_transaction'))
+
+print('\nWhen transaction occurs')
+print(denormalize_df.loc[denormalize_df['credit_used'] > 0, ['ts_to_datetime', 'credit_used']])
+
+print('\nValue of each transaction')
+print(denormalize_df.loc[denormalize_df['credit_used'] > 0, ['credit_used']].rename(columns={'credit_used': 'transaction'}))
